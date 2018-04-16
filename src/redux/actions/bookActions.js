@@ -5,6 +5,9 @@ export function loadBooksSuccess(books) {
   return {type: types.LOAD_BOOKS_SUCCESS, books};
 }
 
+export function CancelRequest() {
+  return {type: types.CANCEL_REQUEST};
+}
 
 
 export function loadBooks(data) {
@@ -12,6 +15,16 @@ export function loadBooks(data) {
   return function(dispatch) {
     return bookApi.getAllBooks(data).then(books => {
       dispatch(loadBooksSuccess(books));
+    }).catch(error => {
+      throw(error);
+    });
+  };
+}
+export function Cancel() {
+  // make async call to api, handle promise, dispatch action when promise is resolved
+  return function(dispatch) {
+    return bookApi.CancelReq().then(() => {
+      dispatch(CancelRequest());
     }).catch(error => {
       throw(error);
     });

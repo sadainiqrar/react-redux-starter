@@ -24,6 +24,8 @@ import {Link, browserHistory} from 'react-router';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import BooksList from './BooksList';
+import { bookApi } from '../../api/bookApi';
+
 import * as actions from '../../redux/actions/bookActions'
 
 
@@ -33,6 +35,8 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+		
+	  isLoading: false,
       books: this.props.books,
 	  value: ''
 	}	  
@@ -43,34 +47,59 @@ class Home extends React.Component {
   
   componentWillMount() {
 	  
-	  
-     this.props.actions.loadBooks(this.state.value);
+	 
 	  
   }
  
 
   handleChange(event) {
-    this.setState({value: event.target.value});
+	
+			//this.props.actions.CancelRequest()
+    this.setState({isLoading: true});
+    this.setState({value: event.target.value})
+	console.log("Props: ", this.props)
+			this.props.actions.loadBooks(event.target.value).then(()=>{
+				
+				
+				this.setState({isLoading: false});
+			})
+			
+	
+	
+	
+	
+	
+    //this.setState({isLoading: false});
+	  
+	
+    event.preventDefault();
   }
 
   handleClick(event) {
 	  
-	  
-	  this.props.actions.loadBooks(this.state.value);
 	//this.props.actions.loadBooks();
 	
 	
     alert('A name was submitted: ' + this.state.value);
-	
+	console.log("Props: ",this.props);
+	this.props.history.push('/search/' + this.state.value);
     event.preventDefault();
+	
 	
 	
 	
   }
 
   render() {
-	  
-    const books = this.props.books;
+	  let books = [];
+	  if(this.props.books[0])
+	  {
+		  books = this.props.books;
+		  
+	  }
+	  else{
+			books = []
+	  }
 	
 	console.log('Books: ', this.props.books);
     return (
@@ -81,14 +110,12 @@ class Home extends React.Component {
 			<input type='submit' value = 'submit'/>
 			</form>
         <div className="col-md-12">
-          <BooksList books={books[0]} />
+		{!this.state.isLoading ? (
+          <BooksList books={books} />
+		  ) : ( <p>Loading</p>)
+		}
         </div>
 	  </section>
-	  
-	  
-	  
-	  
-	  
     );
   }
 }
@@ -99,9 +126,17 @@ Home.propTypes = {
 
 function mapStateToProps(state, ownProps) {
 	
+	if(state.books){
+			return {
+					books: state.books
+				}
+		
+	}
+	else{
     return {
-      books: state.books
-    };
+      books: []
+    }
+	}
  
   
 }

@@ -21,6 +21,11 @@ function App({ children }) {
             Tools
           </Link>
         </li>
+		<li className={styles.navItem}>
+          <Link className={styles.link} to="/search/hobbit">
+            Hobbit
+          </Link>
+        </li>
       </ul>
       <div className={styles.content}>
         {children}

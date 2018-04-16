@@ -7,6 +7,8 @@ export default function bookReducer(state = initialState.books, action) {
   switch(action.type) {
     case types.LOAD_BOOKS_SUCCESS:
      return action.books
+	case types.CANCEL_REQUEST:
+	 return state
     default: 
       return state;
   }
