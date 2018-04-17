@@ -58,7 +58,7 @@ class Home extends React.Component {
     this.setState({isLoading: true});
     this.setState({value: event.target.value})
 	console.log("Props: ", this.props)
-			this.props.actions.loadBooks(event.target.value).then(()=>{
+			this.props.actions.loadBooks({"query": event.target.value, "page": 1}).then(()=>{
 				
 				
 				this.setState({isLoading: false});
@@ -125,7 +125,6 @@ Home.propTypes = {
 };
 
 function mapStateToProps(state, ownProps) {
-	
 	if(state.books){
 			return {
 					books: state.books

@@ -34,6 +34,14 @@ const importSearch = (nextState, cb) => {
     });
 };
 
+const importBook = (nextState, cb) => {
+  import(/* webpackChunkName: "Search" */ '../components/Book')
+    .then(module => cb(null, module.default))
+    .catch(e => {
+      throw e;
+    });
+};
+
 // We use `getComponent` to dynamically load routes.
 // https://github.com/reactjs/react-router/blob/master/docs/guides/DynamicRouting.md
 const routes = (
@@ -41,6 +49,8 @@ const routes = (
     <IndexRoute getComponent={importHome} />
     <Route path="tools" getComponent={importTools} />
     <Route path="search/:query" getComponent={importSearch} />
+	
+    <Route path="book/:id" getComponent={importBook} />
   </Route>
 );
 
@@ -53,6 +63,8 @@ if (module.hot) {
   require('../components/Tools'); // eslint-disable-line global-require
   
   require('../components/Search'); // eslint-disable-line global-require
+  
+  require('../components/Book'); // eslint-disable-line global-require
 }
 
 export default routes;
