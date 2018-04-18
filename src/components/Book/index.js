@@ -8,6 +8,10 @@ import {bindActionCreators} from 'redux';
 
 import * as actions from '../../redux/actions/bookActions'
 
+import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
+import FlatButton from 'material-ui/FlatButton';
+
+
 
 class Book extends React.Component{
 	constructor(props) {
@@ -42,7 +46,20 @@ class Book extends React.Component{
 if(book.title)
 {	
 	  return(
-	  <p>{book.title[0]}</p>
+	  <Card>
+    
+    <CardMedia
+    >
+      <img src={book.image_url[0]} alt="" />
+    </CardMedia>
+    <CardTitle title={book.title[0]} subtitle={book.authors[0].author[0].name[0]}  />
+    <CardText>
+          
+		<p>Average Rating: {book.average_rating[0]}</p>
+		
+		<p>Rating Count: {book.ratings_count[0]}</p>
+    </CardText>
+  </Card>
 	  )
 }
 else{
