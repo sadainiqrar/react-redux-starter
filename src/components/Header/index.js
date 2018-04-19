@@ -14,7 +14,6 @@ const styles = {
   },
 };
 function handleClick(event) {
-	console.log("Header Props: ",event)
 }
 
 function Header(props) {

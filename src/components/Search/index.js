@@ -18,7 +18,19 @@ import IconButton from 'material-ui/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
+import Waypoint from 'react-waypoint';
+import RefreshIndicator from 'material-ui/RefreshIndicator';
 
+
+const style = {
+  container: {
+    position: 'relative',
+  },
+  refresh: {
+    display: 'inline-block',
+    position: 'relative',
+  },
+};
 
 class Search extends React.Component{
 	constructor(props) {
@@ -33,6 +45,7 @@ class Search extends React.Component{
 	}
 	this.handleItemClick = this.handleItemClick.bind(this);
 	this.onLoadMore = this.onLoadMore.bind(this);
+	this._renderWaypoint = this._renderWaypoint.bind(this);
   }
 	
   componentDidMount() {
@@ -52,6 +65,9 @@ class Search extends React.Component{
 	  
 	  
   }
+  
+  
+  
   componentWillReceiveProps(nextProps) {
 	  
 	this.setState({searchString: nextProps.params.query});
@@ -67,15 +83,16 @@ class Search extends React.Component{
 					
 					this.setState({total: nextProps.books[0]["total-results"][0]});
 					
-					console.log("Stated Books: ", nextProps.books)
 					let tPages = ((nextProps.books[0]["total-results"][0])%20) === 0 ? ((nextProps.books[0]["total-results"][0])/20) : Math.floor(((nextProps.books[0]["total-results"][0])/20)+1);
 					
 					this.setState({totalPage: tPages});
+					this.setState({onLoading: false});
 				}
 				else
 				{
 				
 					this.setState({books: []});
+					this.setState({onLoading: false});
 					
 				
 				};
@@ -85,6 +102,7 @@ class Search extends React.Component{
 	  else{
 			
 					this.setState({books: []});
+					this.setState({onLoading: false});
 	  }
 		
 		
@@ -95,7 +113,8 @@ class Search extends React.Component{
   }
   onLoadMore()
   {
-	  console.log("Load More")
+	  
+					this.setState({onLoading: true});
 	  if(this.state.page <= this.state.totalPage)
 	  {
 	  this.props.actions.loadBooks({"query": this.state.searchString, "page": (this.state.page+1)}).then(()=>{
@@ -108,11 +127,21 @@ class Search extends React.Component{
 	  }
 	  
   }
+  
+  
+  _renderWaypoint() {
+    if (!this.state.isLoading) {
+      return (
+        <Waypoint
+          onEnter={this.onLoadMore}
+        />
+      );
+    }
+  }
 	
 
   render() {
 	   
-	  console.log("Books Length", this.state.books)
 	  if(this.state.books.length>0)
 	  {
 		  if((this.state.total)>0)
@@ -139,9 +168,20 @@ class Search extends React.Component{
       </List>
 	   {this.state.page <= this.state.totalPage ? (
 	   
-			<button onClick={this.onLoadMore}>
-            Load More
-          </button>
+			<div className="infinite-scroll-example__waypoint">
+            {this._renderWaypoint()}
+				<div style={style.container}>
+					<center>
+				<RefreshIndicator
+      size={40}
+	  left={0}
+      top={20}
+      status="loading"
+      style={style.refresh}
+    />
+	</center>
+  </div>
+          </div>
       ) : (
 	  <p></p>
       )}

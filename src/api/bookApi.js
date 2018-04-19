@@ -4,11 +4,9 @@ class bookApi {
 
 	static CancelReq()
 	{
-		console.log('canceled called')
 		return this.source.cancel('Canceled previous Request');
 	}
   static getAllBooks(data) {
-	  console.log(data);
 		this.source = axios.CancelToken.source();
 		this.source.cancel('Canceled previous Request');
 		
@@ -24,7 +22,6 @@ class bookApi {
 			console.log(result);
 			books = result.GoodreadsResponse.search;
 		});
-			console.log("api.result",books)
 			return books;
 		
 		
@@ -37,7 +34,6 @@ class bookApi {
   }
   
   static getBook(data) {
-	  console.log(data);
 		
 		this.source = axios.CancelToken.source();
 		
