@@ -9,6 +9,11 @@ export function loadBookSuccess(book) {
   return {type: types.LOAD_BOOK_SUCCESS, book};
 }
 
+export function paginateBookSuccess(books) {
+	
+  return {type: types.PAGINATE_BOOK_SUCCESS, books};
+}
+
 export function CancelRequest() {
   return {type: types.CANCEL_REQUEST};
 }
@@ -34,6 +39,19 @@ export function loadBook(data) {
     });
   };
 }
+
+export function paginate(data) {
+  // make async call to api, handle promise, dispatch action when promise is resolved
+  return function(dispatch) {
+    return bookApi.getAllBooks(data).then(books => {
+      dispatch(paginateBookSuccess(books));
+    }).catch(error => {
+      throw(error);
+    });
+  };
+}
+
+
 export function Cancel() {
   // make async call to api, handle promise, dispatch action when promise is resolved
   return function(dispatch) {

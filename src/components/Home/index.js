@@ -1,22 +1,3 @@
-/*import React from 'react';
-import styles from './styles.scss';
-
-function Home() {
-  return (
-    <section>
-      <p className={styles.paragraph}>
-        Welcome to the <strong>Book Search App</strong>.
-      </p>
-      <div>
-    		<input ref="search" type="search" placeholder="Search criteria" />
-    		<button onClick={this.handleClick}>Go</button>
-    	</div>
-    </section>
-  );
-}
-
-export default Home;
-*/
 
 import React, {PropTypes} from 'react';
 
@@ -30,7 +11,12 @@ import * as actions from '../../redux/actions/bookActions'
 
 import AutoComplete from 'material-ui/AutoComplete';
 
+import RaisedButton from 'material-ui/RaisedButton';
 
+
+const style = {
+  margin: 12,
+};
 
 class Home extends React.Component {
   constructor(props) {
@@ -39,13 +25,15 @@ class Home extends React.Component {
 		
 	  isLoading: false,
       books: this.props.books,
-	  value: ''
+	  booksData: [],
+	  value: "",
+	  total: 0,
+	  query: ""
 	}	  
-    this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleChangeAuto = this.handleChangeAuto.bind(this);
 	
-	this.onNewRequest = this.onNewRequest.bind(this);
+	//this.onNewRequest = this.onNewRequest.bind(this);
   }
   
   componentWillMount() {
@@ -54,42 +42,60 @@ class Home extends React.Component {
 	  
   }
  
-
-  handleChange(event) {
 	
-			//this.props.actions.CancelRequest()
-    this.setState({isLoading: true});
-	console.log(event);
-    this.setState({value: event.target.value})
-	console.log("Props: ", this.props)
-			this.props.actions.loadBooks({"query": event.target.value, "page": 1}).then(()=>{
-				
-				
-				this.setState({isLoading: false});
-			})
-			
-	
-	
-	
-	
-	
-    //this.setState({isLoading: false});
+  componentWillReceiveProps(nextProps) {
 	  
-	
-    event.preventDefault();
+					
+    if(nextProps.books !== this.props.books) {
+		if(nextProps.books[0])
+	  {
+		  if(nextProps.books.length>0){
+				if((nextProps.books[0]["total-results"][0])>0)
+				{
+					
+					this.setState({value: nextProps.books[0].query[0]})
+					this.setState({total:nextProps.books[0]["total-results"][0]})
+					this.setState({books:nextProps.books[0].results[0].work})
+					
+					this.setState({query:nextProps.books[0].query[0]})
+					
+					let bookData = nextProps.books[0].results[0].work.filter((i, index) => (index < 5)).map(book => 
+											{
+												return {name: book.best_book[0].title[0],code: book.best_book[0].id[0]._,q:""};
+											})
+					if(nextProps.books[0]["total-results"][0]>5)
+					{
+						bookData.push({name:(((nextProps.books[0]["total-results"][0]) - 5) + " Other Results"),code:"search",q: this.state.query});
+					}
+					
+					this.setState({booksData: bookData})
+											
+					
+				}
+				else
+				{
+				
+						this.setState({books:[]})
+				
+				};
+		  }
+		  
+	  }
+	  else
+	  {
+		  this.setState({books:[]})
+	  }
+	}
   }
+  
+ 
 
   handleChangeAuto(event) {
 	
 			//this.props.actions.CancelRequest()
-   this.setState({isLoading: true});
-	console.log(event);
-   this.setState({value: event})
-	console.log("Props: ", this.props)
 			this.props.actions.loadBooks({"query": event, "page": 1}).then(()=>{
 				
 				
-				this.setState({isLoading: false});
 			})
 			
 	
@@ -103,11 +109,9 @@ class Home extends React.Component {
    // event.preventDefault();
   }
   onNewRequest(chosenRequest, index) {
-			console.log('onNewRequest', chosenRequest, index);
 	if(chosenRequest.code === "search")
 	{
-		
-		this.props.history.push('/search/' + chosenRequest.q);
+		this.props.history.push('/search/' + this.state.query);
 	}
 	else
 	{
@@ -122,8 +126,6 @@ class Home extends React.Component {
 	//this.props.actions.loadBooks();
 	
 	
-    alert('A name was submitted: ' + this.state.value);
-	console.log("Props: ",this.props);
 	this.props.history.push('/search/' + this.state.value);
     event.preventDefault();
 	
@@ -136,65 +138,28 @@ class Home extends React.Component {
   render() {
 	  
 	  
-	   let books = [];
-	   let bookData = [];
-	   let query = "";
-		let total = 0;
-	  if(this.props.books[0])
-	  {
-		  if(this.props.books.length>0){
-				if((this.props.books[0]["total-results"][0])>0)
-				{
-				
-					total = this.props.books[0]["total-results"][0];
-					books =  this.props.books[0].results[0].work;
-					
-				     query = this.props.books[0].query[0];
-					console.log("Found Books", books)
-					bookData = books.filter((i, index) => (index < 5)).map(book => 
-											{
-												return {name: book.best_book[0].title[0],code: book.best_book[0].id[0]._,q:""};
-											})
-					if(total>5)
-					{
-						bookData.push({name:((total - 5) + " Other Results"),code:"search",q: query});
-					}
-											
-					
-				}
-				else
-				{
-				
-					books = [];
-				
-				};
-		  }
-		  
-	  }
-	  else{
-			books = []
-	  }
 	
+		let config = { text: 'name', value: 'code',option:'q'}
 	
 		
-		let config = { text: 'name', value: 'code',option:'q'}
-	console.log('DataSource: ', bookData);
     return (
     <section>
 	<div>
-	</div>
 			<AutoComplete
           hintText="Search Book"
 		  filter = { AutoComplete.noFilter }
-          dataSource={bookData}
+          dataSource={this.state.booksData}
 		  dataSourceConfig={config}
           onUpdateInput={this.handleChangeAuto}
           floatingLabelText="Search Book"
-		  onNewRequest={ this.onNewRequest }
+		  onNewRequest={ this.onNewRequest.bind(this) }
           fullWidth={true}
         />
-			
-			
+		
+	</div>
+	<center>
+    <RaisedButton label="Find Book" primary={true} style={style} onClick={this.handleClick}/>	
+		</center>	
         
 	  </section>
     );

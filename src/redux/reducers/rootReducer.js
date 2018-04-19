@@ -4,6 +4,8 @@ import book from './bookReducer';
 
 import books from './booksReducer';
 
+import paginatedBooks from './paginateReducer';
+
 
 const rootReducer = combineReducers({
   // short hand property names

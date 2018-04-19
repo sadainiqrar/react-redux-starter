@@ -24,18 +24,21 @@ class Search extends React.Component{
 	constructor(props) {
     super(props);
     this.state = {
-    searchString: "",
-    books: this.props.books,
-	page: 1
+	isLoading: false,
+    searchString: " ",
+    books: [],
+	page: 1,
+	total: 0,
+	totalPage: 0
 	}
 	this.handleItemClick = this.handleItemClick.bind(this);
+	this.onLoadMore = this.onLoadMore.bind(this);
   }
 	
-  componentWillMount() {
+  componentDidMount() {
 	  
     let query = this.props.params.query;
 	
-    this.setState({searchString: query});
 	
 			this.props.actions.loadBooks({"query": query, "page": this.state.page}).then(()=>{
 				
@@ -49,55 +52,77 @@ class Search extends React.Component{
 	  
 	  
   }
- 
-  onPaginate()
-  {
-	  let query = this.props.params.query;
-	
-    this.setState({page: page+1});
-	
-			this.props.actions.loadBooks({"query": query, "page": this.state.page}).then(()=>{
-				
-					this.setState({books: books.concat(this.props.books[0].results[0].work)});
-			})
-  }
-	
-
-  render() {
-	   let books = [];
-	   let total = 0;
-	  if(this.props.books[0])
-	  {
-		  if(this.props.books.length>0){
-				if((this.props.books[0]["total-results"][0])>0)
-				{
-				
-				
-					books =  this.props.books[0].results[0].work;
-					total = this.props.books[0]["total-results"][0];
-					console.log("Stated Books: ", this.state.books)
+  componentWillReceiveProps(nextProps) {
+	  
+	this.setState({searchString: nextProps.params.query});
 					
+    if(nextProps.books !== this.props.books) {
+		
+	  if(nextProps.books[0])
+	  {
+		  if(nextProps.books.length>0){
+				if((nextProps.books[0]["total-results"][0])>0)
+				{
+					this.setState({books: this.state.books.concat(nextProps.books[0].results[0].work)});
+					
+					this.setState({total: nextProps.books[0]["total-results"][0]});
+					
+					console.log("Stated Books: ", nextProps.books)
+					let tPages = ((nextProps.books[0]["total-results"][0])%20) === 0 ? ((nextProps.books[0]["total-results"][0])/20) : Math.floor(((nextProps.books[0]["total-results"][0])/20)+1);
+					
+					this.setState({totalPage: tPages});
 				}
 				else
 				{
 				
-					this.state.books = [];
+					this.setState({books: []});
+					
 				
 				};
 		  }
 		  
 	  }
 	  else{
-			books = []
+			
+					this.setState({books: []});
+	  }
+		
+		
+		
+		
+		
+    }
+  }
+  onLoadMore()
+  {
+	  console.log("Load More")
+	  if(this.state.page <= this.state.totalPage)
+	  {
+	  this.props.actions.loadBooks({"query": this.state.searchString, "page": (this.state.page+1)}).then(()=>{
+				 
+				})
+	 
+	  
+	  
+					this.setState({page: (this.state.page+1)});
 	  }
 	  
-	  if(books.length>0)
+  }
+	
+
+  render() {
+	   
+	  console.log("Books Length", this.state.books)
+	  if(this.state.books.length>0)
 	  {
+		  if((this.state.total)>0)
+		  {
 	 
     return (
+	<div>
       <List>
-        <Subheader>{total + " Books Found"}</Subheader>
-		{books.map((book,index) =>
+        <Subheader>{this.state.total + " Books Found"}</Subheader>
+		{this.state.books.map((book,index) =>
 			<ListItem
 			onClick={this.handleItemClick.bind(this, book.best_book[0].id[0]._)}
 			key={index}
@@ -112,19 +137,43 @@ class Search extends React.Component{
 			/>
 		)}
       </List>
+	   {this.state.page <= this.state.totalPage ? (
+	   
+			<button onClick={this.onLoadMore}>
+            Load More
+          </button>
+      ) : (
+	  <p></p>
+      )}
+	</div>
    
 	
 	
     );
 	  }
+	  else
+	  {
+		 return(
+		  <div>
+		  <center>
+		<h1>No Results found</h1>
+		</center>
+		</div>
+	  ); 
+	  }
+	  }
 	  else{
 		  return(
-		<p>No Results found</p>
+		  <div>
+		  <center>
+		<h1>No Results found</h1>
+		</center>
+		</div>
 	  );
 	  }
   }
+  
 }
-
 Search.propTypes = {
   books: PropTypes.array.isRequired
 };

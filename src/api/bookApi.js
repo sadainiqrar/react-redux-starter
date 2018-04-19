@@ -24,7 +24,7 @@ class bookApi {
 			console.log(result);
 			books = result.GoodreadsResponse.search;
 		});
-		
+			console.log("api.result",books)
 			return books;
 		
 		
