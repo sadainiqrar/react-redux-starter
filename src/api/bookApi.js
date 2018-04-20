@@ -19,7 +19,6 @@ class bookApi {
 		let parseString = require('xml2js').parseString;
 		let books = response.data;
 		parseString(response.data, function (err, result) {
-			console.log(result);
 			books = result.GoodreadsResponse.search;
 		});
 			return books;

@@ -39,6 +39,9 @@ class Search extends React.Component{
 	isLoading: false,
     searchString: " ",
     books: [],
+	apiLoad: true,
+	displayBooks: [],
+	currentBooks: [],
 	page: 1,
 	total: 0,
 	totalPage: 0
@@ -79,6 +82,13 @@ class Search extends React.Component{
 		  if(nextProps.books.length>0){
 				if((nextProps.books[0]["total-results"][0])>0)
 				{
+					let temp = nextProps.books[0].results[0].work.filter((i, index) => (index < 10)).map(book => 
+											{
+												return book;
+											})
+					this.setState({displayBooks: this.state.displayBooks.concat(temp)});
+					
+					this.setState({currentBooks: nextProps.books[0].results[0].work});
 					this.setState({books: this.state.books.concat(nextProps.books[0].results[0].work)});
 					
 					this.setState({total: nextProps.books[0]["total-results"][0]});
@@ -87,21 +97,32 @@ class Search extends React.Component{
 					
 					this.setState({totalPage: tPages});
 					this.setState({onLoading: false});
+					
+					this.setState({apiLoad: false});
 				}
 				else
 				{
 				
 					this.setState({books: []});
+					
+					this.setState({displayBooks: []});
 					this.setState({onLoading: false});
 					
 				
 				};
+		  }
+		  else
+		  {
+			  
+			    this.setState({onLoading: false});
 		  }
 		  
 	  }
 	  else{
 			
 					this.setState({books: []});
+					
+					this.setState({displayBooks: []});
 					this.setState({onLoading: false});
 	  }
 		
@@ -110,21 +131,40 @@ class Search extends React.Component{
 		
 		
     }
+	else{
+		
+					this.setState({onLoading: false});
+	}
   }
   onLoadMore()
   {
-	  
-					this.setState({onLoading: true});
-	  if(this.state.page <= this.state.totalPage)
+	  if(!this.state.apiLoad)
 	  {
+		  
+		  this.setState({onLoading: true});
+		  let temp = this.state.currentBooks.filter((i, index) => (index >= 10 && index < 20)).map(book => 
+											{
+												return book;
+											})	
+		   this.setState({displayBooks: this.state.displayBooks.concat(temp)});
+		  this.setState({onLoading: false});
+		  
+		   this.setState({apiLoad: true});
+	  }
+	  else
+	  {
+	  if(this.state.page < this.state.totalPage)
+	  {
+		  
+		  this.setState({onLoading: true});
 	  this.props.actions.loadBooks({"query": this.state.searchString, "page": (this.state.page+1)}).then(()=>{
 				 
 				})
-	 
-	  
-	  
 					this.setState({page: (this.state.page+1)});
 	  }
+	  }
+	  
+					
 	  
   }
   
@@ -142,7 +182,7 @@ class Search extends React.Component{
 
   render() {
 	   
-	  if(this.state.books.length>0)
+	  if(this.state.displayBooks.length>0)
 	  {
 		  if((this.state.total)>0)
 		  {
@@ -151,7 +191,7 @@ class Search extends React.Component{
 	<div>
       <List>
         <Subheader>{this.state.total + " Books Found"}</Subheader>
-		{this.state.books.map((book,index) =>
+		{this.state.displayBooks.map((book,index) =>
 			<ListItem
 			onClick={this.handleItemClick.bind(this, book.best_book[0].id[0]._)}
 			key={index}
@@ -166,7 +206,7 @@ class Search extends React.Component{
 			/>
 		)}
       </List>
-	   {this.state.page <= this.state.totalPage ? (
+	   {this.state.page < this.state.totalPage ? (
 	   
 			<div className="infinite-scroll-example__waypoint">
             {this._renderWaypoint()}

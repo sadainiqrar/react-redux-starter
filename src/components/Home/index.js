@@ -98,6 +98,7 @@ class Home extends React.Component {
 				
 			})
 			
+	this.setState({value: event})
 	
 	
 	
@@ -125,9 +126,15 @@ class Home extends React.Component {
 	  
 	//this.props.actions.loadBooks();
 	
-	
+	if(this.state.value.length>0)
+	{
 	this.props.history.push('/search/' + this.state.value);
     event.preventDefault();
+	}
+	else{
+	 
+     event.preventDefault();
+	}
 	
 	
 	
