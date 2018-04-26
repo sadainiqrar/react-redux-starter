@@ -1,36 +1,57 @@
 import * as types from './actionTypes';
 import bookApi from '../../api/bookApi';
 
-export function loadBooksSuccess(books) {
-  return { type: types.LOAD_BOOKS_SUCCESS, books };
-}
-export function loadBookSuccess(book) {
-  return { type: types.LOAD_BOOK_SUCCESS, book };
+export function PaginateBooksSuccess(books) {
+  return { type: types.PAGINATE_BOOKS_SUCCESS, books };
 }
 
 export function loadBooks(data) {
   // make async call to api, handle promise, dispatch action when promise is resolved
+
   return dispatch => {
+    dispatch({
+      type: types.LOAD_BOOKS,
+    });
+
     bookApi
       .getAllBooks(data)
       .then(books => {
-        dispatch(loadBooksSuccess(books));
+        dispatch({
+          type: types.LOAD_BOOKS_SUCCESS,
+          payload: books,
+          intent: 'NEW',
+        });
       })
       .catch(error => {
-        throw error;
+        dispatch({
+          type: types.LOAD_BOOKS_FAILURE,
+          payload: error,
+        });
       });
   };
 }
-export function loadBook(data) {
+
+export function PaginateBooks(data) {
   // make async call to api, handle promise, dispatch action when promise is resolved
   return dispatch => {
+    dispatch({
+      type: types.LOAD_BOOKS,
+    });
+
     bookApi
-      .getBook(data)
-      .then(book => {
-        dispatch(loadBookSuccess(book));
+      .getAllBooks(data)
+      .then(books => {
+        dispatch({
+          type: types.LOAD_BOOKS_SUCCESS,
+          payload: books,
+          intent: 'PAGINATE',
+        });
       })
       .catch(error => {
-        throw error;
+        dispatch({
+          type: types.LOAD_BOOKS_FAILURE,
+          payload: error,
+        });
       });
   };
 }

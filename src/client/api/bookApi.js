@@ -14,33 +14,13 @@ class bookApi {
       )
       .then(response => {
         const parseString = xmlParse.parseString;
+
         let books = response.data;
         parseString(response.data, (err, result) => {
           books = result.GoodreadsResponse.search;
         });
+        books[0].page = data.page;
         return books;
-      })
-      .catch(error => error);
-  }
-
-  static getBook(data) {
-    const config = {
-      headers: { 'Access-Control-Allow-Origin': '*' },
-    };
-    return axios
-      .get(
-        `https://cors-anywhere.herokuapp.com/https://www.goodreads.com/book/show.xml?key=MIDoomTSw6xPfQONYXtDWw&id=
-          ${data}`,
-        config
-      )
-      .then(response => {
-        const parseString = xmlParse.parseString;
-        let book = response.data;
-        parseString(response.data, (err, result) => {
-          book = result.GoodreadsResponse.book[0];
-        });
-
-        return book;
       })
       .catch(error => error);
   }

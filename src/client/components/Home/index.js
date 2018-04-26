@@ -1,22 +1,18 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import AutoComplete from 'material-ui/AutoComplete';
 import RaisedButton from 'material-ui/RaisedButton';
+import debounce from 'lodash/debounce';
 import * as actions from '../../redux/actions/bookActions';
 
 const style = {
   margin: 12,
 };
 function mapStateToProps(state) {
-  if (state.books) {
-    return {
-      books: state.books,
-    };
-  }
-
   return {
-    books: [],
+    searchResults: state.lists.searchResults,
+    books: state.entities.books,
   };
 }
 
@@ -28,59 +24,46 @@ export default class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: false,
       books: [],
-      booksData: [],
       value: '',
-      total: 0,
       query: '',
     };
 
     this.handleClick = this.handleClick.bind(this);
-    this.handleChangeAuto = this.handleChangeAuto.bind(this);
+    this.handleChangeAuto = debounce(this.handleChangeAuto.bind(this), 1000);
     this.handleNewRequest = this.handleNewRequest.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.books !== this.props.books) {
-      if (nextProps.books[0]) {
-        if (nextProps.books.length > 0) {
-          if (nextProps.books[0]['total-results'][0] > 0) {
-            this.setState({ value: nextProps.books[0].query[0] });
-            this.setState({ total: nextProps.books[0]['total-results'][0] });
-            this.setState({ books: nextProps.books[0].results[0].work });
-
-            this.setState({ query: nextProps.books[0].query[0] });
-
-            const bookData = nextProps.books[0].results[0].work
-              .filter((i, index) => index < 5)
-              .map(book => ({
-                name: book.best_book[0].title[0],
-                code: book.best_book[0].id[0]._,
-                q: '',
-              }));
-            if (nextProps.books[0]['total-results'][0] > 5) {
-              bookData.push({
-                name: `${nextProps.books[0]['total-results'][0] - 5} Other Results`,
-                code: 'search',
-                q: this.state.query,
-              });
-            }
-
-            this.setState({ booksData: bookData });
-          } else {
-            this.setState({ books: [] });
-          }
+    if (nextProps.searchResults !== this.props.searchResults) {
+      const { query, items, totalResults } = nextProps.searchResults;
+      const books = nextProps.books;
+      this.setState({ query });
+      if (items.length > 0) {
+        const bookData = items.filter((i, index) => index < 5).map(book => ({
+          name: books[book].title,
+          code: book,
+          author: books[book].author,
+          image: books[book].image,
+        }));
+        if (items.length > 5) {
+          bookData.push({
+            name: `${parseInt(totalResults, 10) - 5} Other Results`,
+            code: 'search',
+            author: query,
+            image: '',
+          });
         }
-      } else {
-        this.setState({ books: [] });
+        this.setState({ books: bookData });
       }
     }
   }
 
   handleChangeAuto(value) {
-    this.props.actions.loadBooks({ query: value, page: 1 });
-    this.setState({ value });
+    if (value.length > 0) {
+      this.props.actions.loadBooks({ query: value, page: 1 });
+      this.setState({ value });
+    }
   }
   handleNewRequest(chosenRequest) {
     if (chosenRequest.code === 'search') {
@@ -103,18 +86,18 @@ export default class Home extends React.Component {
   }
 
   render() {
-    const config = { text: 'name', value: 'code', option: 'q' };
-    const { booksData } = this.state;
-
+    const config = { text: 'name', value: 'code', option: 'author', image: 'image' };
+    const { books } = this.state;
     return (
       <section>
         <div>
           <AutoComplete
             hintText="Search Book"
             filter={AutoComplete.noFilter}
-            dataSource={booksData}
+            dataSource={books}
             dataSourceConfig={config}
             onUpdateInput={this.handleChangeAuto}
+            openOnFocus={true}
             floatingLabelText="Search Book"
             onNewRequest={this.handleNewRequest}
             fullWidth
